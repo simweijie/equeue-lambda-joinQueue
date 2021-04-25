@@ -29,6 +29,7 @@ def handler(event, context):
     ## Check if already in Queue
     query = "SELECT status, branchId FROM Queue WHERE customerId={}".format(event['customerId'])
     cur.execute(query)
+    connection.commit()
     rows = cur.fetchall()
     inQueue = False
     branchId = None
@@ -37,11 +38,17 @@ def handler(event, context):
         if row[0] == "Q" or row[0] == "D" or row[0] == "P":
             inQueue = True
             branchId = row[1]
-    query = "SELECT name FROM Branch where id={}".format(branchId)        
-    cur.execute(query)
-    branchName = cur.fetchone()[0]
+            query = "SELECT name FROM Branch where id={}".format(branchId)        
+            cur.execute(query)
+            connection.commit()
+            branchName = cur.fetchone()[0]
+            print("for loop: " + branchName)
     ## Insert if not in Queue
     if(not inQueue):
+        print("not in queue 1")
+        query = "SELECT name FROM Branch where id={}".format(event['branchId'])        
+        cur.execute(query)
+        branchName = cur.fetchone()[0]
         query = "SELECT MAX(queueNumber) FROM Queue WHERE branchId={}".format(event['branchId'])
         cur.execute(query)
         queueNumber= cur.fetchone()[0]
